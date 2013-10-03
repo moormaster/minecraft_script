@@ -17,7 +17,8 @@ MINECRAFT_MAP_FUNC=
 MINECRAFT_MAP_C10TDIR=
 MINECRAFT_MAP_MINECRAFTOVERVIEWERDIR=
 
-MINECRAFT_UPDATE_URL="https://s3.amazonaws.com/MinecraftDownload/launcher/minecraft_server.jar"
+MINECRAFT_UPDATE_URL="http://minecraft.net/download"
+MINECRAFT_UPDATE_XPATH="string(descendant::a[@data-dist='server' and  @data-platform='linux']/@href)"
 MINECRAFT_SCRIPT_FILE="$( readlink -f "$0" )"
 MINECRAFT_SCRIPT_DIR="$( dirname "$MINECRAFT_SCRIPT_FILE" )"
 
@@ -169,12 +170,59 @@ minecraft-save-on()
 	minecraft-send-command save-on
 }
 
+minecraft-delete-current-server-jar()
+{
+	local JARFILE
+
+	JARFILE="$( readlink -e minecraft_server.jar )"
+
+	if [ -e "${JARFILE}" ]
+	then
+		rm -f "${JARFILE}"
+	fi
+	rm -f minecraft_server.jar
+}
+
+minecraft-link-current-server-jar()
+{
+	JARNAME="$1"
+
+	if ! [ -e "${JARNAME}" ]
+	then
+		return 1
+	fi
+
+	ln -s "${JARNAME}" minecraft_server.jar
+}
+
 minecraft-update()
 {
+	local HTMLOUT XMLOUT JARURL JARFILE
+
 	pushd "$MINECRAFT_RUN_DIR" > /dev/null
 
-	rm -f minecraft_server.jar
-	wget "$MINECRAFT_UPDATE_URL" >> "$MINECRAFT_RUN_LOG" 2>&1
+	echo "reading html answer of "$MINECRAFT_UPDATE_URL" ..."
+	HTMLOUT="$( wget -O - "$MINECRAFT_UPDATE_URL" )" >> "$MINECRAFT_RUN_LOG" 2>&1
+
+	echo "parsing xml ..."
+	XMLOUT="$( echo "${HTMLOUT}" | xmllint --recover - )" >> /dev/null 2>&1
+
+	echo -n "parsing download url ... "
+	JARURL="$( echo "${XMLOUT}" | xmllint --xpath "${MINECRAFT_UPDATE_XPATH}" - )"
+	echo "${JARURL}"
+
+	if [ "${JARURL}" != "" ]
+	then
+		JARFILE="$( echo "${JARURL}" | grep -e "[^/]*$" -o )"
+
+		echo "deleting old jar file ..."
+		minecraft-delete-current-server-jar
+
+		wget "$JARURL"
+
+		echo "linking minecraft_server.jar to ${JARFILE} ..."
+		minecraft-link-current-server-jar "${JARFILE}"
+	fi
 
 	popd > /dev/null
 }
