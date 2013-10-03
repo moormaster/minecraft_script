@@ -218,7 +218,7 @@ minecraft-update()
 		echo "deleting old jar file ..."
 		minecraft-delete-current-server-jar
 
-		wget "$JARURL"
+		wget "$JARURL" >> "$MINECRAFT_RUN_LOG" 2>&1
 
 		echo "linking minecraft_server.jar to ${JARFILE} ..."
 		minecraft-link-current-server-jar "${JARFILE}"
