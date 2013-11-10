@@ -17,8 +17,9 @@ MINECRAFT_MAP_FUNC=
 MINECRAFT_MAP_C10TDIR=
 MINECRAFT_MAP_MINECRAFTOVERVIEWERDIR=
 
-MINECRAFT_UPDATE_URL="http://minecraft.net/download"
+MINECRAFT_UPDATE_URL="https://minecraft.net/download"
 MINECRAFT_UPDATE_XPATH="string(descendant::a[@data-dist='server' and  @data-platform='linux']/@href)"
+MINECRAFT_UPDATE_WGETOPTS="--no-check-certificate"
 MINECRAFT_SCRIPT_FILE="$( readlink -f "$0" )"
 MINECRAFT_SCRIPT_DIR="$( dirname "$MINECRAFT_SCRIPT_FILE" )"
 
@@ -202,7 +203,7 @@ minecraft-update()
 	pushd "$MINECRAFT_RUN_DIR" > /dev/null
 
 	echo "reading html answer of "$MINECRAFT_UPDATE_URL" ..."
-	HTMLOUT="$( wget -O - "$MINECRAFT_UPDATE_URL" )" >> "$MINECRAFT_RUN_LOG" 2>&1
+	HTMLOUT="$( wget ${MINECRAFT_UPDATE_WGETOPTS} -O - "$MINECRAFT_UPDATE_URL" )" >> "$MINECRAFT_RUN_LOG" 2>&1
 
 	echo "parsing xml ..."
 	XMLOUT="$( echo "${HTMLOUT}" | xmllint --recover - )" >> /dev/null 2>&1
