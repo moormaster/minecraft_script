@@ -17,8 +17,8 @@ MINECRAFT_MAP_FUNC=
 MINECRAFT_MAP_C10TDIR=
 MINECRAFT_MAP_MINECRAFTOVERVIEWERDIR=
 
-MINECRAFT_UPDATE_URL="https://minecraft.net/download"
-MINECRAFT_UPDATE_XPATH="string(descendant::a[@data-dist='server' and  @data-platform='linux']/@href)"
+MINECRAFT_UPDATE_URL="https://minecraft.net/en/download/server"
+MINECRAFT_UPDATE_XPATH="string(descendant::p/text()[contains(., 'Download')]/../a/@href)"
 MINECRAFT_UPDATE_WGETOPTS="--no-check-certificate"
 MINECRAFT_SCRIPT_FILE="$( readlink -f "$0" )"
 MINECRAFT_SCRIPT_DIR="$( dirname "$MINECRAFT_SCRIPT_FILE" )"
